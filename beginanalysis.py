@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Import psycopg2 as the PostGREsql engine
 import psycopg2
 
