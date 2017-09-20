@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Import psycopg2 as the PostGREsql engine
 import psycopg2
 
@@ -19,7 +17,7 @@ cur.execute("""
     SELECT articles.title, count(*)
     FROM log
     JOIN articles
-    ON log.path LIKE CONCAT('%',articles.slug,'%')
+    ON log.path = concat('/article/', articles.slug)
     GROUP BY articles.title
     ORDER BY count(*)
     DESC
@@ -47,7 +45,7 @@ cur.execute("""
     JOIN (     (SELECT articles.author, count(*)
                 FROM log
                 JOIN articles
-                ON log.path LIKE CONCAT('%',articles.slug,'%')
+                ON log.path = concat('/article/', articles.slug)
                 GROUP BY articles.author)
          ) A
     ON authors.id=A.author
@@ -59,9 +57,10 @@ cur.execute("""
 # as Author Name - 88888 views
 rows = cur.fetchall()
 print "The most popular authors, in order of pageviews, are:"
-for row in rows:
-    print str(row[0]) + " - " + str(row[1]) + " views"
+for title, views in rows:
+    print "{} - {} views".format(title, views)
 print "**********"
+# The FOR loop above was a suggestion from a previous reviewer.
 
 # Third query: Uses two subqueries
 # Subquery 1 returns the number of 404 errors per date
@@ -69,8 +68,9 @@ print "**********"
 # These two tables are joined on 'Date"
 # and then the percent of failures is calculated and only returned
 # if it's more than 1%
+# The to_char and round functions below were suggested by a previous reviewer.
 cur.execute("""
-    SELECT C.d, C.percentfailed*100
+    SELECT to_char(C.d, 'FMMonth FMDD, YYYY'), round(C.percentfailed::decimal*100, 2)
     FROM (      SELECT A.d, CAST(A.fails as float)/B.reqs as percentfailed
                 FROM (      SELECT DATE(time) as d, count(*) as fails
                             FROM log
