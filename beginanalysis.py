@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Import psycopg2 as the PostGREsql engine
 import psycopg2
 
@@ -70,7 +72,8 @@ print "**********"
 # if it's more than 1%
 # The to_char and round functions below were suggested by a previous reviewer.
 cur.execute("""
-    SELECT to_char(C.d, 'FMMonth FMDD, YYYY'), round(C.percentfailed::decimal*100, 2)
+    SELECT to_char(C.d, 'FMMonth FMDD, YYYY'),
+                    round(C.percentfailed::decimal*100, 2)
     FROM (      SELECT A.d, CAST(A.fails as float)/B.reqs as percentfailed
                 FROM (      SELECT DATE(time) as d, count(*) as fails
                             FROM log
